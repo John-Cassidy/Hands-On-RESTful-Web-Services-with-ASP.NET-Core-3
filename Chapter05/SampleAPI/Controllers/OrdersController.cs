@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SampleAPI.Models;
 using SampleAPI.Repositories;
 using SampleAPI.Requests;
+using SampleAPI.Resonses;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,15 +57,21 @@ namespace SampleAPI.Controllers {
         }
 
         [HttpPatch("{id:guid}")]
-        public IActionResult Patch(Guid id, JsonPatchDocument<Order> requestOp) {
+        public IActionResult Patch(Guid id, [FromBody] JsonPatchDocument<Order> requestOp) {
+
+            if (requestOp == null)
+                return BadRequest(ModelState);
+
             var order = _orderRepository.Get(id);
             if (order == null) {
                 return NotFound(new { Message = $"Item with id {id} not exist." });
             }
 
-            requestOp.ApplyTo(order);
-            _orderRepository.Update(id, order);
+            requestOp.ApplyTo(order, ModelState);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            _orderRepository.Update(id, order);
             return Ok();
         }
 
