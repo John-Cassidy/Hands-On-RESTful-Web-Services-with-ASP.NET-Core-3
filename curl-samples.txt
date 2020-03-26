@@ -1,0 +1,17 @@
+curl -X GET https://localhost:5001/api/order -H 'Content-Type: application/json' -k
+
+curl -X GET https://localhost:44383/api/order -H 'Content-Type: application/json' -k
+
+curl -X GET http://172.20.160.1:5000/api/order -H 'Content-Type: application/json' -k
+
+curl -X POST https://localhost:5001/api/order -H 'Content-Type: application/json' -d '' -k
+
+
+203 not found
+curl -X GET https://localhost:5001/api/order/a54f58bc-216d-4a40-8040-bafaec68f2de -H 'Content-Type: application/json' -i -k
+
+curl -X GET https://localhost:5001/api/order/786fdd51-b985-44a7-85c3-5f72b15307a2 -H 'Content-Type: application/json' -i -k
+
+
+
+curl -X POST https://localhost:5001/api/order/ -H 'Content-Type: application/json' -d '{"itemsIds": ["1","4"], "currency": "USD"}' -i -k
