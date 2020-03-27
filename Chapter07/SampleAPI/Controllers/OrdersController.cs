@@ -1,42 +1,39 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using SampleAPI.Filters;
 using SampleAPI.Models;
 using SampleAPI.Repositories;
 using SampleAPI.Requests;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
-namespace SampleAPI.Controllers
-{
+namespace SampleAPI.Controllers {
     [Route("api/order")]
+    [CustomControllerFilter]
     [ApiController]
-    public class OrderController : ControllerBase
-    {
+    [ServiceFilter(typeof(CustomActionFilter))]
+    [CustomException]
+    public class OrderController : ControllerBase {
         private readonly IOrderRepository _orderRepository;
 
-        public OrderController(IOrderRepository ordersRepository)
-        {
+        public OrderController(IOrderRepository ordersRepository) {
             _orderRepository = ordersRepository;
         }
 
         [HttpGet]
-        public IActionResult Get()
-        {
+        public IActionResult Get() {
             return Ok(Map(_orderRepository.Get()));
         }
 
         [HttpGet("{id:guid}")]
-        [OrderExists]
-        public IActionResult GetById(Guid id)
-        {
+        //[OrderExists]
+        public IActionResult GetById(Guid id) {
             return Ok(Map(_orderRepository.Get(id)));
         }
 
         [HttpPost]
-        public IActionResult Post(OrderRequest request)
-        {
+        public IActionResult Post(OrderRequest request) {
             var order = Map(request);
             _orderRepository.Add(order);
             return CreatedAtAction(nameof(GetById), new { id = order.Id }, null);
@@ -44,17 +41,14 @@ namespace SampleAPI.Controllers
 
         [HttpPut("{id:guid}")]
         [OrderExists]
-        public IActionResult Put(Guid id, OrderRequest request)
-        {
-            if (request.ItemsIds == null)
-            {
+        public IActionResult Put(Guid id, OrderRequest request) {
+            if (request.ItemsIds == null) {
                 return BadRequest();
             }
 
             var order = _orderRepository.Get(id);
 
-            if (order == null)
-            {
+            if (order == null) {
                 return NotFound(new { Message = $"Item with id {id} not exist." });
             }
 
@@ -66,11 +60,9 @@ namespace SampleAPI.Controllers
 
         [HttpPatch("{id:guid}")]
         [OrderExists]
-        public IActionResult Patch(Guid id, JsonPatchDocument<Order> requestOp)
-        {
+        public IActionResult Patch(Guid id, JsonPatchDocument<Order> requestOp) {
             var order = _orderRepository.Get(id);
-            if (order == null)
-            {
+            if (order == null) {
                 return NotFound(new { Message = $"Item with id {id} not exist." });
             }
 
@@ -82,12 +74,10 @@ namespace SampleAPI.Controllers
 
         [HttpDelete("{id:guid}")]
         [OrderExists]
-        public IActionResult Delete(Guid id)
-        {
+        public IActionResult Delete(Guid id) {
             var order = _orderRepository.Get(id);
 
-            if (order == null)
-            {
+            if (order == null) {
                 return NotFound(new { Message = $"Item with id {id} not exist." });
             }
 
@@ -95,33 +85,27 @@ namespace SampleAPI.Controllers
             return NoContent();
         }
 
-        private Order Map(OrderRequest request)
-        {
-            return new Order
-            {
+        private Order Map(OrderRequest request) {
+            return new Order {
                 Id = Guid.NewGuid(),
                 ItemsIds = request.ItemsIds,
                 Currency = request.Currency
             };
         }
 
-        private Order Map(OrderRequest request, Order order)
-        {
+        private Order Map(OrderRequest request, Order order) {
             order.ItemsIds = request.ItemsIds;
             order.Currency = request.Currency;
 
             return order;
         }
 
-        private IEnumerable<OrderResponse> Map(IEnumerable<Order> orders)
-        {
+        private IEnumerable<OrderResponse> Map(IEnumerable<Order> orders) {
             return orders.Select(Map).ToList();
         }
 
-        private OrderResponse Map(Order order)
-        {
-            return new OrderResponse
-            {
+        private OrderResponse Map(Order order) {
+            return new OrderResponse {
                 Id = order.Id,
                 ItemsIds = order.ItemsIds,
                 Currency = order.Currency
